@@ -5,7 +5,7 @@
 class BMPImage
 {
 public:
-	BMPImage(int width, int hight);
+	BMPImage(int width, int height);
 	~BMPImage();
 
 	Color GetPixel(int row, int col) const;
