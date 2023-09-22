@@ -12,7 +12,8 @@ public:
 	void SetPixel(const Color& color, int row, int col);
 	
 	void RotateIamge();
-	
+	void ApplyGaussianBluring();
+
 	void ExportToFile(const char * path);
 	void ImportFromFile(const char * path);
 
