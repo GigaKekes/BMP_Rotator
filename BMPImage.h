@@ -9,7 +9,12 @@ public:
 	~BMPImage();
 
 	Color GetPixel(int row, int col) const;
-	void setPixel(const Color& color, int row, int col);
+	void SetPixel(const Color& color, int row, int col);
+	
+	void RotateIamge();
+	
+	void ExportToFile(const char * path);
+	void ImportFromFile(const char * path);
 
 private:
 	int mWidth;
