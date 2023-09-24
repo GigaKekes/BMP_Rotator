@@ -26,7 +26,7 @@ void BMPImage::ExportToFile(const char* path)
 void BMPImage::ImportFromFile(const char* path)
 {
 	FILE* file;
-	fopen_s(&file,path, "r");
+	fopen_s(&file, path, "r");
 
 	if (!file)
 	{
@@ -53,7 +53,10 @@ void BMPImage::FreeData()
 {
 	if (bmpFile)
 	{
-		free(bmpFile->data);
+		if (bmpFile->data)
+		{
+			free(bmpFile->data);
+		}
 		free(bmpFile);
 	}
 }

@@ -4,8 +4,6 @@
 #define UINT unsigned int
 #define UCHAR unsigned char
 
-#include <vector>
-
 #pragma pack(1)
 typedef struct BMPHeader
 {
@@ -20,8 +18,8 @@ typedef struct DIBHeader
 	UINT DIBHeaderSize;
 	UINT width;
 	UINT height;
-	UCHAR plateColorsCount;
-	UCHAR bitsPerPixel;
+	unsigned short plateColorsCount;
+	unsigned short bitsPerPixel;
 	UINT compression;
 	UINT dataSize;
 	UINT printWidth;
