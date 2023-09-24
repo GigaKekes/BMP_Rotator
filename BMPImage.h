@@ -9,7 +9,7 @@ typedef struct BMPHeader
 {
 	UCHAR id[2];
 	UINT fileSize;
-	UCHAR appSpec[2];
+	UCHAR appSpec[4];
 	UINT pixelOffset;
 } BMPHeader;
 
