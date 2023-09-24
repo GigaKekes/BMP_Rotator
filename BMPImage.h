@@ -1,47 +1,51 @@
 #ifndef BMP_IMAGE_H
 #define BMP_IMAGE_H
 
-#define uint unsigned int
-#define uchar unsigned char
+#define UINT unsigned int
+#define UCHAR unsigned char
 
 #include <vector>
 
+#pragma pack(1)
 typedef struct BMPHeader
 {
-	uchar id[2];
-	uint fileSize;
-	uchar appSpec[2];
-	uint pixelOffset;
+	UCHAR id[2];
+	UINT fileSize;
+	UCHAR appSpec[2];
+	UINT pixelOffset;
 } BMPHeader;
 
 typedef struct DIBHeader
 {
-	uint DIBHeaderSize;
-	uint width;
-	uint height;
-	uchar plateColorsCount;
-	uchar bitsPerPixel;
-	uint compression;
-	uint dataSize;
-	uint printWidth;
-	uint printHeight;
-	uint paletteColorsCount;
-	uint importantColorsCount;
+	UINT DIBHeaderSize;
+	UINT width;
+	UINT height;
+	UCHAR plateColorsCount;
+	UCHAR bitsPerPixel;
+	UINT compression;
+	UINT dataSize;
+	UINT printWidth;
+	UINT printHeight;
+	UINT paletteColorsCount;
+	UINT importantColorsCount;
 
 }DIBHeader;
 
 typedef struct BMPFile
 {
 	BMPHeader bmpHeader;
-	DIBHeader dipHeader;
-	uchar* data;
+	DIBHeader dibHeader;
+	UCHAR* data;
 }BMPFile;
-
+#pragma pop
 
 
 class BMPImage
 {
 public:
+	BMPFile * bmpFile;
+
+
 	BMPImage(int width, int height);
 	BMPImage(const char* path);
 	~BMPImage();
@@ -52,11 +56,12 @@ public:
 	void ExportToFile(const char * path);
 	void ImportFromFile(const char * path);
 
+	void FreeData();
 
 private:
 	int mWidth;
 	int mHeight;
-	unsigned char* data;
+	unsigned char* mdata;
 };
 
 #endif
