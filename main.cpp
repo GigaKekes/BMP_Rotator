@@ -5,7 +5,7 @@
 
 int main()
 {
-	BMPImage bmim("C:\\Users\\User\\Desktop\\sampels\\sample5.bmp");
+	BMPImage bmim("C:\\Users\\User\\Desktop\\sampels\\sample2.bmp");
 
 	std::cout << "Width: " << bmim.bmpFile->dibHeader.width << std::endl;
 	std::cout << "Height: " << bmim.bmpFile->dibHeader.height << std::endl;
@@ -13,15 +13,10 @@ int main()
 	std::cout << "bits per pixel: " << bmim.bmpFile->dibHeader.bitsPerPixel << std::endl;
 
 
-	/*for (int i = 0; i < bmim.bmpFile->dibHeader.dataSize; i++)
+	for (int i = 0; i < bmim.bmpFile->dibHeader.width* bmim.bmpFile->dibHeader.height; i++)
 	{
-		if (i % 16 == 0)
-		{
-			printf("\n%04x: ", i);
-		}
-		printf("%02x ", bmim.bmpFile->data[i]);
-	}*/
-	bmim.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol5.bmp");
+		std::cout << (int)bmim.readableData[i][0] << ' ' << (int)bmim.readableData[i][1] << ' ' << (int)bmim.readableData[i][2] << std::endl;
+	}
 
 	bmim.FreeData();
 

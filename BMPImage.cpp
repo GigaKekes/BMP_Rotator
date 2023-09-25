@@ -37,7 +37,9 @@ void BMPImage::ExportToFile(const char* path)
 
 	fwrite(&bmpFile->bmpHeader, sizeof(struct BMPHeader), 1, file);
 	fwrite(&bmpFile->dibHeader, sizeof(struct DIBHeader), 1, file);
+	
 	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
+	
 	fwrite(bmpFile->data, bmpFile->dibHeader.dataSize, 1, file);
 	fclose(file);
 
@@ -60,24 +62,48 @@ void BMPImage::ImportFromFile(const char* path)
 	fread(&bmpFile->bmpHeader, sizeof(BMPHeader), 1, file);
 	fread(&bmpFile->dibHeader, sizeof(DIBHeader), 1, file);
 
-	bmpFile->data = (unsigned char*)malloc(bmpFile->dibHeader.dataSize);
+	mWidth = bmpFile->dibHeader.width;
+	mHeight = bmpFile->dibHeader.height;
+
+
+	int bytesPerPixel = bmpFile->dibHeader.bitsPerPixel / 8;
+	int rowSize = bytesPerPixel * mWidth;
+	int rowPadding = (4 - (rowSize % 4)) % 4;
+	int rowsLeft = 0;
+
+	unsigned char* row = (unsigned char*)malloc(rowSize + rowPadding);
+
+	readableData = (unsigned char**)malloc(mHeight * mWidth * sizeof(*readableData));
+	for (int i = 0; i < mHeight * mWidth; i++) {
+		readableData[i] = (unsigned char*)malloc(3 * sizeof(readableData[0]));
+	}
 
 	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
-	fread(bmpFile->data, bmpFile->dibHeader.dataSize, 1, file);
+
+	while (rowsLeft < mHeight)
+	{
+		fread(row, rowSize + rowPadding, 1, file);
+		for (int i = 0; i < rowSize; i += bytesPerPixel)
+		{
+			readableData[rowsLeft * mWidth + i / bytesPerPixel][0] = row[i+2];
+			readableData[rowsLeft * mWidth + i / bytesPerPixel][1] = row[i+1];
+			readableData[rowsLeft * mWidth + i / bytesPerPixel][2] = row[i];
+		}
+		rowsLeft++;
+	}
+	free(row);
+
 	fclose(file);
-
-	mdata = bmpFile->data;
-
 }
 
 void BMPImage::FreeData()
 {
-	if (bmpFile)
+	if (readableData)
 	{
-		if (bmpFile->data)
+		for (int i = 0; i < mWidth * mHeight; i++)
 		{
-			free(bmpFile->data);
+			free(readableData[i]);
 		}
-		free(bmpFile);
+		free(readableData);
 	}
 }

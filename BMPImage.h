@@ -54,11 +54,11 @@ public:
 	void ImportFromFile(const char * path);
 
 	void FreeData();
+	unsigned char** readableData;
 
 private:
 	int mWidth;
 	int mHeight;
-	unsigned char* mdata;
 };
 
 #endif
