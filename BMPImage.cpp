@@ -11,8 +11,9 @@ BMPImage::~BMPImage()
 }
 
 
-void BMPImage::RotateIamge()
+void BMPImage::RotateImage()
 {
+
 }
 
 void BMPImage::ApplyGaussianBluring()

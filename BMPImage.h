@@ -47,7 +47,7 @@ public:
 	BMPImage(const char* path);
 	~BMPImage();
 
-	void RotateIamge();
+	void RotateImage();
 	void ApplyGaussianBluring();
 
 	void ExportToFile(const char * path);
