@@ -1,6 +1,9 @@
 #ifndef BMP_IMAGE_H
 #define BMP_IMAGE_H
 
+#define CLOCKWISE_ROTATION 0
+#define CONTER_CLOCKWISE_ROTATION 1
+
 #include <stdint.h>
 
 #pragma pack(1)
@@ -19,13 +22,13 @@ typedef struct DIBHeader
 	int32_t width;           // Image width in pixels
 	int32_t height;          // Image height in pixels
 	uint16_t planes;         // Number of color planes (1)
-	uint16_t bitsPerPixel;	 // Bits per pixel (e.g., 24 for RGB)
+	uint16_t bitsPerPixel;	 // Bits per pixel (e.g., 24 for RGB and 32 for ARGB)
 	uint32_t compression;    // Compression method (0 for no compression)
-	uint32_t dataSize;       // Image size in bytes (can be 0 for no compression)
-	int32_t pWidth;			 // Pixels per meter in X direction (can be 0)
-	int32_t pHeight;		 // Pixels per meter in Y direction (can be 0)
-	uint32_t colorsUsed;    // Number of colors used (0 for full color)
-	uint32_t importantColors; // Number of important colors (0 for all)
+	uint32_t dataSize;       // Image size in bytes 
+	int32_t pWidth;			 // Pixels per meter in X direction
+	int32_t pHeight;		 // Pixels per meter in Y direction
+	uint32_t colorsUsed;    // Number of colors used
+	uint32_t importantColors; // Number of important colors
 
 }DIBHeader;
 
@@ -42,8 +45,8 @@ class BMPImage
 {
 public:
 	BMPFile * bmpFile;
+	unsigned char** readableData;
 
-	BMPImage(int width, int height);
 	BMPImage(const char* path);
 	~BMPImage();
 
@@ -54,7 +57,6 @@ public:
 	void ImportFromFile(const char * path);
 
 	void FreeData();
-	unsigned char** readableData;
 
 private:
 	int mWidth;

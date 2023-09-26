@@ -13,7 +13,40 @@ BMPImage::~BMPImage()
 
 void BMPImage::RotateImage()
 {
+	if (!readableData)
+	{
+		std::cout << "There is no data inputed to perform the rotation" << std::endl;
+		exit(0);
+	}
+	
+	unsigned char** newReadableData = (unsigned char**)malloc(mHeight * mWidth * sizeof(*newReadableData));
+	for (int i = 0; i < mHeight * mWidth; i++) {
+		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
+	}
+	int newWidth = mHeight;
+	int newHeight = mWidth;
 
+	for (int i = 0; i < newHeight; i++)
+	{ 
+		for (int j = 0; j < newWidth; j++)
+		{
+			newReadableData[i * newWidth + j][0] = readableData[j * mWidth + (mWidth - i - 1)][0];
+			newReadableData[i * newWidth + j][1] = readableData[j * mWidth + (mWidth - i - 1)][1];
+			newReadableData[i * newWidth + j][2] = readableData[j * mWidth + (mWidth - i - 1)][2];
+		}
+	}
+	unsigned char** temp = readableData;
+	readableData = newReadableData;
+
+	for (int i = 0; i < mWidth * mHeight; i++)
+	{
+		free(temp[i]);
+	}
+	free(temp);
+
+	bmpFile->dibHeader.height = newHeight; mWidth = newHeight;
+	bmpFile->dibHeader.width = newWidth; mHeight = newWidth;
+	
 }
 
 void BMPImage::ApplyGaussianBluring()

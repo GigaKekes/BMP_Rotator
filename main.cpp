@@ -9,11 +9,20 @@ void printDataBytes(BMPImage bmim);
 
 int main()
 {
-	BMPImage bmim("C:\\Users\\User\\Desktop\\sampels\\sample2.bmp");
+	BMPImage bmim("C:\\Users\\User\\Desktop\\sampels\\sample1.bmp");
 
 	printEssential(bmim);
 	space();
 	printRGB(bmim);
+	space();
+
+	bmim.RotateImage();
+
+	printEssential(bmim);
+	space();
+	printRGB(bmim);
+	space();
+
 
 	bmim.FreeData();
 	return 0;
@@ -37,7 +46,7 @@ void printRGB(BMPImage bmim)
 {
 	for (int i = 0; i < bmim.bmpFile->dibHeader.width * bmim.bmpFile->dibHeader.height; i++)
 	{
-		std::cout << '(' << i / bmim.bmpFile->dibHeader.height << ';' << i % bmim.bmpFile->dibHeader.width << ") "
+		std::cout << '(' << i % bmim.bmpFile->dibHeader.width << ';' << i / bmim.bmpFile->dibHeader.width << ") "
 			<< (int)bmim.readableData[i][0] << ' ' << (int)bmim.readableData[i][1] << " "
 			<< (int)bmim.readableData[i][2] << std::endl;
 	}
