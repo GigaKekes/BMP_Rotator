@@ -12,7 +12,7 @@ int main()
 {
 	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample6.bmp");
 	printHeader(b);
-	b.RotateImage(CONTER_CLOCKWISE_ROTATION);
+	b.ApplyGaussianBluring();
 	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol6.bmp");
 
 

@@ -1,6 +1,8 @@
 #include "BMPImage.h"
 #include <iostream>
 
+#define TABLE_SIZE 5
+
 BMPImage::BMPImage(const char* path)
 {
 	ImportFromFile(path);
@@ -65,6 +67,54 @@ void BMPImage::RotateImage(int direction)
 
 void BMPImage::ApplyGaussianBluring()
 {
+	float blurTable[TABLE_SIZE][TABLE_SIZE] = {
+		{0.0030, 0.0133, 0.0219, 0.0133, 0.0030},
+		{0.0133, 0.0596, 0.0983, 0.0596, 0.0133},
+		{0.0219, 0.0983, 0.1621, 0.0983, 0.0219},
+		{0.0133, 0.0596, 0.0983, 0.0596, 0.0133},
+		{0.0030, 0.0133, 0.0219, 0.0133, 0.0030}
+	};
+
+	const int width = bmpFile->dibHeader.width;
+	const int height = bmpFile->dibHeader.height;
+	std::cout << width << ' ' << height << '\n';
+	
+	unsigned char** newReadableData = (unsigned char**)malloc(mHeight * mWidth * sizeof(*newReadableData));
+	for (int i = 0; i < mHeight * mWidth; i++) {
+		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
+	}
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			float sumr = 0.0;
+			float sumg = 0.0;
+			float sumb = 0.0;
+			for (int i = 0; i < TABLE_SIZE; i++) {
+				for (int j = 0; j < TABLE_SIZE; j++) {
+					int xn = x + i - TABLE_SIZE / 2;
+					int yn = y + j - TABLE_SIZE / 2;
+					if (xn >= 0 && xn < width && yn >= 0 && yn < height) {
+						sumr += readableData[yn * width + xn][0] * blurTable[i][j];
+						sumg += readableData[yn * width + xn][1] * blurTable[i][j];
+						sumb += readableData[yn * width + xn][2] * blurTable[i][j];
+					}
+				}
+			}
+			newReadableData[y * width + x][0] = (int)sumr;
+			newReadableData[y * width + x][1] = (int)sumg;
+			newReadableData[y * width + x][2] = (int)sumb;
+		}
+	}
+
+	unsigned char** temp = readableData;
+	readableData = newReadableData;
+
+	for (int i = 0; i < mWidth * mHeight; i++)
+	{
+		free(temp[i]);
+	}
+	free(temp);
+
 }
 
 void BMPImage::ExportToFile(const char* path)
