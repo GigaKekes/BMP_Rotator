@@ -48,9 +48,8 @@ public:
 	unsigned char** readableData;
 
 	BMPImage(const char* path);
-	~BMPImage();
 
-	void RotateImage();
+	void RotateImage(int direction);
 	void ApplyGaussianBluring();
 
 	void ExportToFile(const char * path);

@@ -6,12 +6,7 @@ BMPImage::BMPImage(const char* path)
 	ImportFromFile(path);
 }
 
-BMPImage::~BMPImage()
-{
-}
-
-
-void BMPImage::RotateImage()
+void BMPImage::RotateImage(int direction)
 {
 	if (!readableData)
 	{
@@ -23,18 +18,38 @@ void BMPImage::RotateImage()
 	for (int i = 0; i < mHeight * mWidth; i++) {
 		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
 	}
-	int newWidth = mHeight;
-	int newHeight = mWidth;
+	int newWidth = bmpFile->dibHeader.height;
+	int newHeight = bmpFile->dibHeader.width;
 
-	for (int i = 0; i < newHeight; i++)
-	{ 
-		for (int j = 0; j < newWidth; j++)
-		{
-			newReadableData[i * newWidth + j][0] = readableData[j * mWidth + (mWidth - i - 1)][0];
-			newReadableData[i * newWidth + j][1] = readableData[j * mWidth + (mWidth - i - 1)][1];
-			newReadableData[i * newWidth + j][2] = readableData[j * mWidth + (mWidth - i - 1)][2];
-		}
+	switch (direction)
+	{
+		case CLOCKWISE_ROTATION:
+			for (int i = 0; i < newHeight; i++)
+			{
+				for (int j = 0; j < newWidth; j++)
+				{
+					newReadableData[i * newWidth + j][0] = readableData[j * mWidth + (mWidth - i - 1)][0];
+					newReadableData[i * newWidth + j][1] = readableData[j * mWidth + (mWidth - i - 1)][1];
+					newReadableData[i * newWidth + j][2] = readableData[j * mWidth + (mWidth - i - 1)][2];
+				}
+			}
+			break;
+		case CONTER_CLOCKWISE_ROTATION:
+			for (int i = 0; i < newHeight; i++)
+			{
+				for (int j = 0; j < newWidth; j++)
+				{
+					newReadableData[i * newWidth + j][0] = readableData[(mHeight - j - 1) * mWidth + i][0];
+					newReadableData[i * newWidth + j][1] = readableData[(mHeight - j - 1) * mWidth + i][1];
+					newReadableData[i * newWidth + j][2] = readableData[(mHeight - j - 1) * mWidth + i][2];
+
+				}
+			}
+			break;
 	}
+	bmpFile->dibHeader.height = newHeight; mWidth = newHeight;
+	bmpFile->dibHeader.width = newWidth; mHeight = newWidth;
+	
 	unsigned char** temp = readableData;
 	readableData = newReadableData;
 
@@ -44,8 +59,7 @@ void BMPImage::RotateImage()
 	}
 	free(temp);
 
-	bmpFile->dibHeader.height = newHeight; mWidth = newHeight;
-	bmpFile->dibHeader.width = newWidth; mHeight = newWidth;
+	
 	
 }
 
@@ -60,9 +74,9 @@ void BMPImage::ExportToFile(const char* path)
 		std::cout << "There is no data imported" << std::endl;
 		exit(0);
 	}
-	
+
 	FILE* file;
-	fopen_s(&file, path, "w");
+	fopen_s(&file, path, "wb");
 	if (!file)
 	{
 		std::cout << "Error. Failed to write into " << path << std::endl;
@@ -71,11 +85,28 @@ void BMPImage::ExportToFile(const char* path)
 
 	fwrite(&bmpFile->bmpHeader, sizeof(struct BMPHeader), 1, file);
 	fwrite(&bmpFile->dibHeader, sizeof(struct DIBHeader), 1, file);
-	
 	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
 	
-	fwrite(bmpFile->data, bmpFile->dibHeader.dataSize, 1, file);
-	fclose(file);
+	char c = 0;
+	int bytesPerPixel = bmpFile->dibHeader.bitsPerPixel / 8;
+	int rowSize = bytesPerPixel * mWidth;
+	int rowPadding = (4 - (rowSize % 4)) % 4;
+	
+
+	for (int i = 0; i < bmpFile->dibHeader.height; i++)
+	{
+		for (int j = 0; j < bmpFile->dibHeader.width; j++)
+		{
+			fwrite(&readableData[i * bmpFile->dibHeader.width + j][2], sizeof(char), 1, file);
+			fwrite(&readableData[i * bmpFile->dibHeader.width + j][1], sizeof(char), 1, file);
+			fwrite(&readableData[i * bmpFile->dibHeader.width + j][0], sizeof(char), 1, file);
+		}
+		for (int j = rowPadding; j != 0; j--)
+		{
+			fwrite(&c, sizeof(char), 1, file);
+		}
+	}
+
 
 
 } 
