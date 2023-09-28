@@ -12,9 +12,11 @@ int main()
 {
 	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample6.bmp");
 	printHeader(b);
-	b.ApplyGaussianBluring();
-	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol6.bmp");
 
+	space();
+
+	BMPImage b2("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
+	printHeader(b2);
 
 
 	b.FreeData();
@@ -45,17 +47,6 @@ void printRGB(BMPImage bmim)
 	}
 }
 
-void printDataBytes(BMPImage bmim)
-{
-	for (int i = 0; i < bmim.bmpFile->dibHeader.dataSize; i++)
-	{
-		if (i % 16 == 0)
-		{
-			printf("\n%04x: ", i);
-		}
-		printf("%02x ", bmim.bmpFile->data[i]);
-	}
-}
 
 void printHeader(BMPImage bmim)
 {

@@ -56,10 +56,6 @@ public:
 	void ImportFromFile(const char * path);
 
 	void FreeData();
-
-private:
-	int mWidth;
-	int mHeight;
 };
 
 #endif
