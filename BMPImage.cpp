@@ -179,7 +179,7 @@ void BMPImage::ExportToFile(const char* path)
 void BMPImage::ImportFromFile(const char* path)
 {
 	FILE* file;
-	fopen_s(&file, path, "r");
+	fopen_s(&file, path, "rb");
 
 	if (!file)
 	{

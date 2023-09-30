@@ -10,8 +10,9 @@ void printHeader(BMPImage bmim);
 
 int main()
 {
-	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample10.bmp");
-	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol10.bmp");
+	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
+	b.RotateImage(CONTER_CLOCKWISE_ROTATION);
+	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol3.bmp");
 
 }
 
