@@ -1,18 +1,83 @@
 ﻿#include "BMPImage.h"
-#include <stdio.h>
 #include <iostream>
+#include <string>
+
+using namespace std;
 
 void space();
 void printRGB(BMPImage bmim);
 void printEssential(BMPImage bmim);
-void printDataBytes(BMPImage bmim);
 void printHeader(BMPImage bmim);
 
 int main()
 {
-	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
-	b.RotateImage(CONTER_CLOCKWISE_ROTATION);
-	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol3.bmp");
+	string importPath;
+	cout << "Enter a path to the file: ";
+	getline(cin, importPath);
+
+	const char* nimportPath = importPath.c_str();
+	BMPImage b(nimportPath);
+
+	cout << "Image imported succsessfuly" << endl;
+
+
+	int option = 0;
+	while(option != 5)
+	{
+		cout << "1. Rotate image clockwise\n2. Rotate image conter clockwise\n3. Apply Gaussian bluring\n4. Export to file\n5. Quit" << endl;
+		cin >> option;
+
+		switch (option)
+		{
+			case 1: 
+			{
+				b.RotateImage(CLOCKWISE_ROTATION);
+				cout << "Image rotated clockwise succsessfuly" << endl;
+				break;
+			}
+
+			case 2: 
+			{
+				b.RotateImage(CONTER_CLOCKWISE_ROTATION);
+				cout << "Image rotated conter clockwise succsessfuly" << endl;
+				break;
+			}
+
+			case 3: 
+			{
+				b.ApplyGaussianBluring();
+				cout << "Gaussian bluring applyed succsessfuly" << endl;
+				break;
+			}
+
+			case 4:
+			{
+				string exportPath;
+				cout << "Enter a path to the file: ";
+
+				cin.ignore();
+				getline(cin, exportPath);
+
+				const char* nExportPath = exportPath.c_str();
+
+				b.ExportToFile(nExportPath);
+
+				cout << "Image Exported succsessfuly" << endl;
+				break;
+			}
+			
+			case 5:
+			{
+				cout << "Quitting" << endl;
+				break;
+			}
+			
+			default:
+				cout << "No such command" << endl;
+		}
+	}
+
+
 
 }
 
