@@ -20,6 +20,7 @@ BMPImage::~BMPImage()
 		free(readableData);
 	}
 
+	free(bmpFile->garbage);
 	free(bmpFile);
 }
 
@@ -75,7 +76,6 @@ void BMPImage::RotateImage(int direction)
 		free(temp[i]);
 	}
 	free(temp);
-
 	
 	
 }
