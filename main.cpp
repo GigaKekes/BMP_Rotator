@@ -10,17 +10,9 @@ void printHeader(BMPImage bmim);
 
 int main()
 {
-	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample6.bmp");
-	printHeader(b);
+	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample10.bmp");
+	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol10.bmp");
 
-	space();
-
-	BMPImage b2("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
-	printHeader(b2);
-
-
-	b.FreeData();
-	return 0;
 }
 
 void space()
@@ -46,7 +38,6 @@ void printRGB(BMPImage bmim)
 			<< (int)bmim.readableData[i][2] << std::endl;
 	}
 }
-
 
 void printHeader(BMPImage bmim)
 {

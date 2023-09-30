@@ -32,10 +32,12 @@ typedef struct DIBHeader
 
 }DIBHeader;
 
+
 typedef struct BMPFile
 {
 	BMPHeader bmpHeader;
 	DIBHeader dibHeader;
+	unsigned char* garbage;
 	unsigned char* data;
 }BMPFile;
 #pragma pop
@@ -48,6 +50,7 @@ public:
 	unsigned char** readableData;
 
 	BMPImage(const char* path);
+	~BMPImage();
 
 	void RotateImage(int direction);
 	void ApplyGaussianBluring();

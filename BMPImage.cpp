@@ -9,6 +9,20 @@ BMPImage::BMPImage(const char* path)
 	ImportFromFile(path);
 }
 
+BMPImage::~BMPImage()
+{
+	if (readableData)
+	{
+		for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+		{
+			free(readableData[i]);
+		}
+		free(readableData);
+	}
+
+	free(bmpFile);
+}
+
 void BMPImage::RotateImage(int direction)
 {
 	if (!readableData)
@@ -50,8 +64,8 @@ void BMPImage::RotateImage(int direction)
 			}
 			break;
 	}
-	bmpFile->dibHeader.height = newHeight; bmpFile->dibHeader.width = newHeight;
-	bmpFile->dibHeader.width = newWidth; bmpFile->dibHeader.height = newWidth;
+	bmpFile->dibHeader.height = newHeight;
+	bmpFile->dibHeader.width = newWidth; 
 	
 	unsigned char** temp = readableData;
 	readableData = newReadableData;
@@ -135,6 +149,7 @@ void BMPImage::ExportToFile(const char* path)
 
 	fwrite(&bmpFile->bmpHeader, sizeof(struct BMPHeader), 1, file);
 	fwrite(&bmpFile->dibHeader, sizeof(struct DIBHeader), 1, file);
+	fwrite(&bmpFile->garbage, sizeof(bmpFile->garbage), 1, file);
 	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
 	
 	char c = 0;
@@ -176,6 +191,8 @@ void BMPImage::ImportFromFile(const char* path)
 	bmpFile = (BMPFile*)malloc(sizeof(BMPFile));
 	fread(&bmpFile->bmpHeader, sizeof(BMPHeader), 1, file);
 	fread(&bmpFile->dibHeader, sizeof(DIBHeader), 1, file);
+	bmpFile->garbage = (unsigned char*)malloc(bmpFile->bmpHeader.pixelOffset - 54);
+	fread(&bmpFile->garbage, sizeof(bmpFile->bmpHeader.pixelOffset - 54), 1, file);
 
 	int bytesPerPixel = bmpFile->dibHeader.bitsPerPixel / 8;
 	int rowSize = bytesPerPixel * bmpFile->dibHeader.width;
@@ -183,16 +200,18 @@ void BMPImage::ImportFromFile(const char* path)
 
 	unsigned char* row = (unsigned char*)malloc(rowSize + rowPadding);
 
-	readableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*readableData));
-	for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++) 
-	{
-		readableData[i] = (unsigned char*)malloc(3 * sizeof(readableData[0]));
-	}
+	
 
 	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
 
 	if (bytesPerPixel == 3)
 	{
+		readableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*readableData));
+		for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++)
+		{
+			readableData[i] = (unsigned char*)malloc(3 * sizeof(unsigned char));
+		}
+
 		for(int i = 0; i < bmpFile->dibHeader.height; i++)
 		{
 			fread(row, rowSize + rowPadding, 1, file);
@@ -204,35 +223,13 @@ void BMPImage::ImportFromFile(const char* path)
 			}
 		}
 	}
-	else if (bytesPerPixel == 4)
-	{
-		for (int i = 0; i < bmpFile->dibHeader.height; i++)
-		{
-			fread(row, rowSize + rowPadding, 1, file);
-			for (int j = 0; j < rowSize; j += bytesPerPixel)
-			{
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][0] = row[j + 3];
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][1] = row[j + 2];
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][2] = row[j + 1];
-			}
-		}
-	}
-	bmpFile->dibHeader.bitsPerPixel = 24;
-	
-	free(row);
 
+	free(row);
 	fclose(file);
 }
 
 void BMPImage::FreeData()
 {
-	if (readableData)
-	{
-		for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
-		{
-			free(readableData[i]);
-		}
-		free(readableData);
-	}
+	
 }
 
