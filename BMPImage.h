@@ -58,7 +58,6 @@ public:
 	void ExportToFile(const char * path);
 	void ImportFromFile(const char * path);
 
-	void FreeData();
 };
 
 #endif

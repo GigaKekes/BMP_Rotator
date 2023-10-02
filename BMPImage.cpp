@@ -228,8 +228,3 @@ void BMPImage::ImportFromFile(const char* path)
 	fclose(file);
 }
 
-void BMPImage::FreeData()
-{
-	
-}
-
