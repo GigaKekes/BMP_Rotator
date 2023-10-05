@@ -5,6 +5,7 @@
 #define CONTER_CLOCKWISE_ROTATION 1
 
 #include <stdint.h>
+#include <vector>
 
 #pragma pack(1)
 typedef struct BMPHeader
@@ -38,7 +39,6 @@ typedef struct BMPFile
 	BMPHeader bmpHeader;
 	DIBHeader dibHeader;
 	unsigned char* garbage;
-	unsigned char* data;
 }BMPFile;
 #pragma pop
 
@@ -53,11 +53,16 @@ public:
 	~BMPImage();
 
 	void RotateImage(int direction);
-	void ApplyGaussianBluring();
+	void ApplyGaussianBluring(int r);
 
 	void ExportToFile(const char * path);
 	void ImportFromFile(const char * path);
 
+private:
+	void boxBlur(unsigned char** newReadableData, int r);
+	void boxBlurH(unsigned char** newReadableData, int r);
+	void boxBlurT(unsigned char** newReadableData, int r);
+	std::vector<int> boxesForGauss(double sigma, int n);
 };
 
 #endif

@@ -8,8 +8,16 @@ void space();
 void printRGB(BMPImage bmim);
 void printEssential(BMPImage bmim);
 void printHeader(BMPImage bmim);
+void startDefaultUI();
 
 int main()
+{
+	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
+	b.ApplyGaussianBluring(5);
+	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol3.bmp");
+}
+
+void startDefaultUI()
 {
 	string importPath;
 	cout << "Enter a path to the file: ";
@@ -22,63 +30,64 @@ int main()
 
 
 	int option = 0;
-	while(option != 5)
+	while (option != 5)
 	{
 		cout << "1. Rotate image clockwise\n2. Rotate image conter clockwise\n3. Apply Gaussian bluring\n4. Export to file\n5. Quit" << endl;
 		cin >> option;
 
 		switch (option)
 		{
-			case 1: 
-			{
-				b.RotateImage(CLOCKWISE_ROTATION);
-				cout << "Image rotated clockwise succsessfuly" << endl;
-				break;
-			}
+		case 1:
+		{
+			b.RotateImage(CLOCKWISE_ROTATION);
+			cout << "Image rotated clockwise succsessfuly" << endl;
+			break;
+		}
 
-			case 2: 
-			{
-				b.RotateImage(CONTER_CLOCKWISE_ROTATION);
-				cout << "Image rotated conter clockwise succsessfuly" << endl;
-				break;
-			}
+		case 2:
+		{
+			b.RotateImage(CONTER_CLOCKWISE_ROTATION);
+			cout << "Image rotated conter clockwise succsessfuly" << endl;
+			break;
+		}
 
-			case 3: 
-			{
-				b.ApplyGaussianBluring();
-				cout << "Gaussian bluring applyed succsessfuly" << endl;
-				break;
-			}
+		case 3:
+		{
+			int r = 0;
+			cout << "Enter radius: ";
+			cin >> r;
 
-			case 4:
-			{
-				string exportPath;
-				cout << "Enter a path to the file: ";
+			b.ApplyGaussianBluring(r);
+			cout << "Gaussian bluring applyed succsessfuly" << endl;
+			break;
+		}
 
-				cin.ignore();
-				getline(cin, exportPath);
+		case 4:
+		{
+			string exportPath;
+			cout << "Enter a path to the file: ";
 
-				const char* nExportPath = exportPath.c_str();
+			cin.ignore();
+			getline(cin, exportPath);
 
-				b.ExportToFile(nExportPath);
+			const char* nExportPath = exportPath.c_str();
 
-				cout << "Image Exported succsessfuly" << endl;
-				break;
-			}
-			
-			case 5:
-			{
-				cout << "Quitting" << endl;
-				break;
-			}
-			
-			default:
-				cout << "No such command" << endl;
+			b.ExportToFile(nExportPath);
+
+			cout << "Image Exported succsessfuly" << endl;
+			break;
+		}
+
+		case 5:
+		{
+			cout << "Quitting" << endl;
+			break;
+		}
+
+		default:
+			cout << "No such command" << endl;
 		}
 	}
-
-
-
 }
 
 void space()

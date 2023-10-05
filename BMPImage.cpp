@@ -1,5 +1,8 @@
 #include "BMPImage.h"
 #include <iostream>
+#include <cmath>
+#include <vector>
+using namespace std;
 
 #define TABLE_SIZE 5
 
@@ -19,9 +22,7 @@ BMPImage::~BMPImage()
 		}
 		free(readableData);
 	}
-
 	free(bmpFile->garbage);
-	free(bmpFile);
 }
 
 void BMPImage::RotateImage(int direction)
@@ -80,45 +81,169 @@ void BMPImage::RotateImage(int direction)
 	
 }
 
-void BMPImage::ApplyGaussianBluring()
+#pragma region gaussian blur
+vector<int> BMPImage::boxesForGauss(double sigma, int n)
 {
-	float blurTable[TABLE_SIZE][TABLE_SIZE] = {
-		{0.0030, 0.0133, 0.0219, 0.0133, 0.0030},
-		{0.0133, 0.0596, 0.0983, 0.0596, 0.0133},
-		{0.0219, 0.0983, 0.1621, 0.0983, 0.0219},
-		{0.0133, 0.0596, 0.0983, 0.0596, 0.0133},
-		{0.0030, 0.0133, 0.0219, 0.0133, 0.0030}
-	};
-
-	const int width = bmpFile->dibHeader.width;
-	const int height = bmpFile->dibHeader.height;
+	int wl = floor(sqrt((12 * sigma * sigma / n) + 1));
 	
+	if (wl % 2 == 0) 
+		wl--;
+
+	int wu = wl + 2;
+
+	int m = round((12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4));
+
+	vector<int> sizes;  
+	for (int i = 0; i < n; i++) 
+		sizes.push_back(i < m ? wl : wu);
+	
+	return sizes;
+}
+void BMPImage::boxBlurT(unsigned char** newReadableData, int r) 
+{
+	double iarr = (float)1 / (r + r + 1);
+
+	int w = bmpFile->dibHeader.width;
+	int h = bmpFile->dibHeader.height;
+
+	for (int i = 0; i < w; i++) {
+		int ti = i, li = ti, ri = ti + r * w;
+		int fv0 = readableData[ti][0], fv1 = readableData[ti][1], fv2 = readableData[ti][3];
+		int lv0 = readableData[ti + w - 1][0], lv1 = readableData[ti + w * (h - 1)][1], lv2 = readableData[ti + w * (h - 1)][2];
+		int val0 = (r + 1) * fv0, val1 = (r + 1) * fv1, val2 = (r + 1) * fv2;
+
+
+		for (int j = 0; j < r; j++)
+		{
+			val0 += readableData[ti + j * w][0];
+			val1 += readableData[ti + j * w][1];
+			val2 += readableData[ti + j * w][2];
+
+		}
+		for (int j = 0; j <= r; j++) 
+		{ 
+
+			val0 += readableData[ri][0] - fv0;
+			val1 += readableData[ri][1] - fv1;
+			val2 += readableData[ri][2] - fv2;
+
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+
+			ri += w; 
+			ti += w; 
+		}
+
+		for (int j = r + 1; j < h - r; j++) 
+		{ 
+			val0 += readableData[ri][0] - readableData[li][0];
+			val1 += readableData[ri][1] - readableData[li][1];
+			val2 += readableData[ri][2] - readableData[li][2];
+
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+		
+			li += w;
+			ri += w;
+			ti += w;
+		}
+		for (int j = h - r; j < h; j++) 
+		{ 
+			val0 += lv0 - readableData[li][0];
+			val1 += lv1 - readableData[li][1];
+			val2 += lv2 - readableData[li][2];
+
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+			
+			li += w; 
+			ti += w; 
+		}
+	}
+}
+void BMPImage::boxBlurH(unsigned char** newReadableData, int r) {
+	float iarr = (float)1 / (r + r + 1);
+	int w = bmpFile->dibHeader.width;
+	int h = bmpFile->dibHeader.height;
+
+
+	for (int i = 0; i < h; i++) {
+		int ti = i * w, li = ti, ri = ti + r;
+		char fv0 = readableData[ti][0], fv1 = readableData[ti][1], fv2 = readableData[ti][2];
+		char lv0 = readableData[ti + w - 1][0], lv1 = readableData[ti + w - 1][1], lv2 = readableData[ti + w - 1][2];
+		int val0 = (r + 1) * fv0, val1 = (r + 1) * fv1, val2 = (r + 1) * fv2;
+
+
+		for (int j = 0; j < r; j++)
+		{
+			val0 += readableData[ti + j][0];
+			val1 += readableData[ti + j][1];
+			val2 += readableData[ti + j][2];
+
+		}
+		for (int j = 0; j <= r; j++)
+		{
+			val0 += readableData[ri][0] - fv0;
+			val1 += readableData[ri][1] - fv1;
+			val2 += readableData[ri][2] - fv2;
+			ri++;
+
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+			ti++;
+		}
+		for (int j = r + 1; j < w - r; j++)
+		{
+			val0 += readableData[ri][0] - readableData[li][0];
+			val1 += readableData[ri][1] - readableData[li][1];
+			val2 += readableData[ri][2] - readableData[li][2];
+			li++;
+			ri++;
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+			ti++;
+		}
+		for (int j = w - r; j < w; j++)
+		{
+			val0 += lv0 - readableData[li][0];
+			val1 += lv1 - readableData[li][1];
+			val2 += lv2 - readableData[li][2];
+			li++;
+			newReadableData[ti][0] = round(val0 * iarr);
+			newReadableData[ti][1] = round(val1 * iarr);
+			newReadableData[ti][2] = round(val2 * iarr);
+			ti++;
+			
+		}
+	}
+}
+void BMPImage::boxBlur(unsigned char** newReadableData, int r) {
+	for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+	{
+		newReadableData[i][0] = readableData[i][0];
+		newReadableData[i][1] = readableData[i][1];
+		newReadableData[i][2] = readableData[i][2];
+	}
+	boxBlurH(newReadableData, r);
+	boxBlurT(newReadableData, r);
+}
+
+void BMPImage::ApplyGaussianBluring(int r) {
+
 	unsigned char** newReadableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*newReadableData));
 	for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++) {
 		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
 	}
 
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			float sumr = 0.0;
-			float sumg = 0.0;
-			float sumb = 0.0;
-			for (int i = 0; i < TABLE_SIZE; i++) {
-				for (int j = 0; j < TABLE_SIZE; j++) {
-					int xn = x + i - TABLE_SIZE / 2;
-					int yn = y + j - TABLE_SIZE / 2;
-					if (xn >= 0 && xn < width && yn >= 0 && yn < height) {
-						sumr += readableData[yn * width + xn][0] * blurTable[i][j];
-						sumg += readableData[yn * width + xn][1] * blurTable[i][j];
-						sumb += readableData[yn * width + xn][2] * blurTable[i][j];
-					}
-				}
-			}
-			newReadableData[y * width + x][0] = (int)sumr;
-			newReadableData[y * width + x][1] = (int)sumg;
-			newReadableData[y * width + x][2] = (int)sumb;
-		}
-	}
+	vector<int> bxs = boxesForGauss(r, 3);
+	boxBlur(newReadableData, (bxs[0] - 1) / 2);
+	boxBlur(newReadableData, (bxs[1] - 1) / 2);
+	boxBlur(newReadableData, (bxs[2] - 1) / 2);
 
 	unsigned char** temp = readableData;
 	readableData = newReadableData;
@@ -128,8 +253,9 @@ void BMPImage::ApplyGaussianBluring()
 		free(temp[i]);
 	}
 	free(temp);
-
 }
+
+#pragma endregion
 
 void BMPImage::ExportToFile(const char* path)
 {
