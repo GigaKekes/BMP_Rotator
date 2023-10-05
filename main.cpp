@@ -1,6 +1,7 @@
 ﻿#include "BMPImage.h"
 #include <iostream>
 #include <string>
+#include <chrono>
 
 using namespace std;
 
@@ -12,9 +13,7 @@ void startDefaultUI();
 
 int main()
 {
-	BMPImage b("C:\\Users\\User\\Desktop\\sampels\\sample3.bmp");
-	b.ApplyGaussianBluring(5);
-	b.ExportToFile("C:\\Users\\User\\Desktop\\sampels\\sol3.bmp");
+	startDefaultUI();
 }
 
 void startDefaultUI()
@@ -39,15 +38,21 @@ void startDefaultUI()
 		{
 		case 1:
 		{
+			auto start_time = std::chrono::steady_clock::now();
 			b.RotateImage(CLOCKWISE_ROTATION);
-			cout << "Image rotated clockwise succsessfuly" << endl;
+			auto end_time = std::chrono::steady_clock::now();
+			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+			cout << "Image rotated clockwise succsessfuly in " << elapsed_ms.count() << "ms" << endl;
 			break;
 		}
 
 		case 2:
 		{
+			auto start_time = std::chrono::steady_clock::now();
 			b.RotateImage(CONTER_CLOCKWISE_ROTATION);
-			cout << "Image rotated conter clockwise succsessfuly" << endl;
+			auto end_time = std::chrono::steady_clock::now();
+			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+			cout << "Image rotated conter clockwise succsessfuly in " << elapsed_ms.count() << "ms" << endl;
 			break;
 		}
 
@@ -57,8 +62,12 @@ void startDefaultUI()
 			cout << "Enter radius: ";
 			cin >> r;
 
+			auto start_time = std::chrono::steady_clock::now();
 			b.ApplyGaussianBluring(r);
-			cout << "Gaussian bluring applyed succsessfuly" << endl;
+			auto end_time = std::chrono::steady_clock::now();
+			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+			cout << "Gaussian bluring applyed succsessfuly in " << elapsed_ms.count() << "ms" << endl;
 			break;
 		}
 
