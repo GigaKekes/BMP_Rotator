@@ -268,7 +268,7 @@ void BMPImage::ExportToFile(const char* path)
 	}
 
 	fwrite(&bmpHeader, sizeof(struct BMPHeader), 1, file);
-	fwrite(&garbage, sizeof(garbage), 1, file);
+	fwrite(&garbage, static_cast<size_t>(bmpHeader.pixelOffset) - 54, 1, file);
 	fseek(file, bmpHeader.pixelOffset, SEEK_SET);
 	
 	char c = 0;
@@ -308,8 +308,8 @@ void BMPImage::ImportFromFile(const char* path)
 
 	
 	fread(&bmpHeader, sizeof(BMPHeader), 1, file);
-	garbage = (unsigned char*)malloc(bmpHeader.pixelOffset - 54);
-	fread(&garbage, sizeof(bmpHeader.pixelOffset - 54), 1, file);
+	garbage = (unsigned char*)malloc(static_cast<size_t>(bmpHeader.pixelOffset) - 54);
+	fread(garbage, static_cast<size_t>(bmpHeader.pixelOffset) - 54, 1, file);
 
 	int bytesPerPixel = bmpHeader.bitsPerPixel / 8;
 	int rowSize = bytesPerPixel * bmpHeader.width;

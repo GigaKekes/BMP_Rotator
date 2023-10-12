@@ -12,7 +12,6 @@ class BMPImage
 public:
 	BMPHeader bmpHeader;
 	unsigned char* garbage;
-
 	unsigned char** readableData;
 	BMPImage(const char* path);
 	~BMPImage();
