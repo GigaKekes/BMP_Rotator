@@ -16,13 +16,13 @@ BMPImage::~BMPImage()
 {
 	if (readableData)
 	{
-		for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+		for (int i = 0; i < bmpHeader.width * bmpHeader.height; i++)
 		{
 			free(readableData[i]);
 		}
 		free(readableData);
 	}
-	free(bmpFile->garbage);
+	free(garbage);
 }
 
 void BMPImage::RotateImage(int direction)
@@ -33,12 +33,12 @@ void BMPImage::RotateImage(int direction)
 		exit(0);
 	}
 	
-	unsigned char** newReadableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*newReadableData));
-	for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++) {
+	unsigned char** newReadableData = (unsigned char**)malloc(bmpHeader.height * bmpHeader.width * sizeof(*newReadableData));
+	for (int i = 0; i < bmpHeader.height * bmpHeader.width; i++) {
 		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
 	}
-	int newWidth = bmpFile->dibHeader.height;
-	int newHeight = bmpFile->dibHeader.width;
+	int newWidth = bmpHeader.height;
+	int newHeight = bmpHeader.width;
 
 	switch (direction)
 	{
@@ -47,9 +47,9 @@ void BMPImage::RotateImage(int direction)
 			{
 				for (int j = 0; j < newWidth; j++)
 				{
-					newReadableData[i * newWidth + j][0] = readableData[j * bmpFile->dibHeader.width + (bmpFile->dibHeader.width - i - 1)][0];
-					newReadableData[i * newWidth + j][1] = readableData[j * bmpFile->dibHeader.width + (bmpFile->dibHeader.width - i - 1)][1];
-					newReadableData[i * newWidth + j][2] = readableData[j * bmpFile->dibHeader.width + (bmpFile->dibHeader.width - i - 1)][2];
+					newReadableData[i * newWidth + j][0] = readableData[j * bmpHeader.width + (bmpHeader.width - i - 1)][0];
+					newReadableData[i * newWidth + j][1] = readableData[j * bmpHeader.width + (bmpHeader.width - i - 1)][1];
+					newReadableData[i * newWidth + j][2] = readableData[j * bmpHeader.width + (bmpHeader.width - i - 1)][2];
 				}
 			}
 			break;
@@ -58,21 +58,21 @@ void BMPImage::RotateImage(int direction)
 			{
 				for (int j = 0; j < newWidth; j++)
 				{
-					newReadableData[i * newWidth + j][0] = readableData[(bmpFile->dibHeader.height - j - 1) * bmpFile->dibHeader.width + i][0];
-					newReadableData[i * newWidth + j][1] = readableData[(bmpFile->dibHeader.height - j - 1) * bmpFile->dibHeader.width + i][1];
-					newReadableData[i * newWidth + j][2] = readableData[(bmpFile->dibHeader.height - j - 1) * bmpFile->dibHeader.width + i][2];
+					newReadableData[i * newWidth + j][0] = readableData[(bmpHeader.height - j - 1) * bmpHeader.width + i][0];
+					newReadableData[i * newWidth + j][1] = readableData[(bmpHeader.height - j - 1) * bmpHeader.width + i][1];
+					newReadableData[i * newWidth + j][2] = readableData[(bmpHeader.height - j - 1) * bmpHeader.width + i][2];
 
 				}
 			}
 			break;
 	}
-	bmpFile->dibHeader.height = newHeight;
-	bmpFile->dibHeader.width = newWidth; 
+	bmpHeader.height = newHeight;
+	bmpHeader.width = newWidth; 
 	
 	unsigned char** temp = readableData;
 	readableData = newReadableData;
 
-	for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+	for (int i = 0; i < bmpHeader.width * bmpHeader.height; i++)
 	{
 		free(temp[i]);
 	}
@@ -99,28 +99,28 @@ vector<int> BMPImage::boxesForGauss(double sigma, int n)
 	
 	return sizes;
 }
-void BMPImage::boxBlurT(unsigned char** newReadableData, int r) 
+void BMPImage::boxBlurT(unsigned char** newReadableData, int radius) 
 {
-	double iarr = (float)1 / (r + r + 1);
+	double iarr = (float)1 / (radius + radius + 1);
 
-	int w = bmpFile->dibHeader.width;
-	int h = bmpFile->dibHeader.height;
+	int w = bmpHeader.width;
+	int h = bmpHeader.height;
 
 	for (int i = 0; i < w; i++) {
-		int ti = i, li = ti, ri = ti + r * w;
+		int ti = i, li = ti, ri = ti + radius * w;
 		int fv0 = readableData[ti][0], fv1 = readableData[ti][1], fv2 = readableData[ti][3];
 		int lv0 = readableData[ti + w - 1][0], lv1 = readableData[ti + w * (h - 1)][1], lv2 = readableData[ti + w * (h - 1)][2];
-		int val0 = (r + 1) * fv0, val1 = (r + 1) * fv1, val2 = (r + 1) * fv2;
+		int val0 = (radius + 1) * fv0, val1 = (radius + 1) * fv1, val2 = (radius + 1) * fv2;
 
 
-		for (int j = 0; j < r; j++)
+		for (int j = 0; j < radius; j++)
 		{
 			val0 += readableData[ti + j * w][0];
 			val1 += readableData[ti + j * w][1];
 			val2 += readableData[ti + j * w][2];
 
 		}
-		for (int j = 0; j <= r; j++) 
+		for (int j = 0; j <= radius; j++) 
 		{ 
 
 			val0 += readableData[ri][0] - fv0;
@@ -135,7 +135,7 @@ void BMPImage::boxBlurT(unsigned char** newReadableData, int r)
 			ti += w; 
 		}
 
-		for (int j = r + 1; j < h - r; j++) 
+		for (int j = radius + 1; j < h - radius; j++) 
 		{ 
 			val0 += readableData[ri][0] - readableData[li][0];
 			val1 += readableData[ri][1] - readableData[li][1];
@@ -149,7 +149,7 @@ void BMPImage::boxBlurT(unsigned char** newReadableData, int r)
 			ri += w;
 			ti += w;
 		}
-		for (int j = h - r; j < h; j++) 
+		for (int j = h - radius; j < h; j++) 
 		{ 
 			val0 += lv0 - readableData[li][0];
 			val1 += lv1 - readableData[li][1];
@@ -166,8 +166,8 @@ void BMPImage::boxBlurT(unsigned char** newReadableData, int r)
 }
 void BMPImage::boxBlurH(unsigned char** newReadableData, int r) {
 	float iarr = (float)1 / (r + r + 1);
-	int w = bmpFile->dibHeader.width;
-	int h = bmpFile->dibHeader.height;
+	int w = bmpHeader.width;
+	int h = bmpHeader.height;
 
 
 	for (int i = 0; i < h; i++) {
@@ -223,7 +223,7 @@ void BMPImage::boxBlurH(unsigned char** newReadableData, int r) {
 	}
 }
 void BMPImage::boxBlur(unsigned char** newReadableData, int r) {
-	for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+	for (int i = 0; i < bmpHeader.width * bmpHeader.height; i++)
 	{
 		newReadableData[i][0] = readableData[i][0];
 		newReadableData[i][1] = readableData[i][1];
@@ -235,8 +235,8 @@ void BMPImage::boxBlur(unsigned char** newReadableData, int r) {
 
 void BMPImage::ApplyGaussianBluring(int r) {
 
-	unsigned char** newReadableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*newReadableData));
-	for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++) {
+	unsigned char** newReadableData = (unsigned char**)malloc(bmpHeader.height * bmpHeader.width * sizeof(*newReadableData));
+	for (int i = 0; i < bmpHeader.height * bmpHeader.width; i++) {
 		newReadableData[i] = (unsigned char*)malloc(3 * sizeof(newReadableData[0]));
 	}
 
@@ -248,7 +248,7 @@ void BMPImage::ApplyGaussianBluring(int r) {
 	unsigned char** temp = readableData;
 	readableData = newReadableData;
 
-	for (int i = 0; i < bmpFile->dibHeader.width * bmpFile->dibHeader.height; i++)
+	for (int i = 0; i < bmpHeader.width * bmpHeader.height; i++)
 	{
 		free(temp[i]);
 	}
@@ -259,12 +259,6 @@ void BMPImage::ApplyGaussianBluring(int r) {
 
 void BMPImage::ExportToFile(const char* path)
 {
-	if (!bmpFile)
-	{
-		std::cout << "There is no data imported" << std::endl;
-		exit(0);
-	}
-
 	FILE* file;
 	fopen_s(&file, path, "wb");
 	if (!file)
@@ -273,24 +267,23 @@ void BMPImage::ExportToFile(const char* path)
 		exit(0);
 	}
 
-	fwrite(&bmpFile->bmpHeader, sizeof(struct BMPHeader), 1, file);
-	fwrite(&bmpFile->dibHeader, sizeof(struct DIBHeader), 1, file);
-	fwrite(&bmpFile->garbage, sizeof(bmpFile->garbage), 1, file);
-	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
+	fwrite(&bmpHeader, sizeof(struct BMPHeader), 1, file);
+	fwrite(&garbage, sizeof(garbage), 1, file);
+	fseek(file, bmpHeader.pixelOffset, SEEK_SET);
 	
 	char c = 0;
-	int bytesPerPixel = bmpFile->dibHeader.bitsPerPixel / 8;
-	int rowSize = bytesPerPixel * bmpFile->dibHeader.width;
+	int bytesPerPixel = bmpHeader.bitsPerPixel / 8;
+	int rowSize = bytesPerPixel * bmpHeader.width;
 	int rowPadding = (4 - (rowSize % 4)) % 4;
 	
 
-	for (int i = 0; i < bmpFile->dibHeader.height; i++)
+	for (int i = 0; i < bmpHeader.height; i++)
 	{
-		for (int j = 0; j < bmpFile->dibHeader.width; j++)
+		for (int j = 0; j < bmpHeader.width; j++)
 		{
-			fwrite(&readableData[i * bmpFile->dibHeader.width + j][2], sizeof(char), 1, file);
-			fwrite(&readableData[i * bmpFile->dibHeader.width + j][1], sizeof(char), 1, file);
-			fwrite(&readableData[i * bmpFile->dibHeader.width + j][0], sizeof(char), 1, file);
+			fwrite(&readableData[i * bmpHeader.width + j][2], sizeof(char), 1, file);
+			fwrite(&readableData[i * bmpHeader.width + j][1], sizeof(char), 1, file);
+			fwrite(&readableData[i * bmpHeader.width + j][0], sizeof(char), 1, file);
 		}
 		for (int k = rowPadding; k != 0; k--)
 		{
@@ -309,43 +302,41 @@ void BMPImage::ImportFromFile(const char* path)
 
 	if (!file)
 	{
-		std::cout << "Error. Failed to read " << path << std::endl;
+		std::cout << "\nError. Failed to read " << path << std::endl;
 		exit(0);
 	}
 
 	
-	bmpFile = (BMPFile*)malloc(sizeof(BMPFile));
-	fread(&bmpFile->bmpHeader, sizeof(BMPHeader), 1, file);
-	fread(&bmpFile->dibHeader, sizeof(DIBHeader), 1, file);
-	bmpFile->garbage = (unsigned char*)malloc(bmpFile->bmpHeader.pixelOffset - 54);
-	fread(&bmpFile->garbage, sizeof(bmpFile->bmpHeader.pixelOffset - 54), 1, file);
+	fread(&bmpHeader, sizeof(BMPHeader), 1, file);
+	garbage = (unsigned char*)malloc(bmpHeader.pixelOffset - 54);
+	fread(&garbage, sizeof(bmpHeader.pixelOffset - 54), 1, file);
 
-	int bytesPerPixel = bmpFile->dibHeader.bitsPerPixel / 8;
-	int rowSize = bytesPerPixel * bmpFile->dibHeader.width;
+	int bytesPerPixel = bmpHeader.bitsPerPixel / 8;
+	int rowSize = bytesPerPixel * bmpHeader.width;
 	int rowPadding = (4 - (rowSize % 4)) % 4;
 
 	unsigned char* row = (unsigned char*)malloc(rowSize + rowPadding);
 
 	
 
-	fseek(file, bmpFile->bmpHeader.pixelOffset, SEEK_SET);
+	fseek(file, bmpHeader.pixelOffset, SEEK_SET);
 
 	if (bytesPerPixel == 3)
 	{
-		readableData = (unsigned char**)malloc(bmpFile->dibHeader.height * bmpFile->dibHeader.width * sizeof(*readableData));
-		for (int i = 0; i < bmpFile->dibHeader.height * bmpFile->dibHeader.width; i++)
+		readableData = (unsigned char**)malloc(bmpHeader.height * bmpHeader.width * sizeof(*readableData));
+		for (int i = 0; i < bmpHeader.height * bmpHeader.width; i++)
 		{
 			readableData[i] = (unsigned char*)malloc(3 * sizeof(unsigned char));
 		}
 
-		for(int i = 0; i < bmpFile->dibHeader.height; i++)
+		for(int i = 0; i < bmpHeader.height; i++)
 		{
 			fread(row, rowSize + rowPadding, 1, file);
 			for (int j = 0; j < rowSize; j += bytesPerPixel)
 			{
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][0] = row[j + 2];
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][1] = row[j + 1];
-				readableData[i * bmpFile->dibHeader.width + j / bytesPerPixel][2] = row[j];
+				readableData[i * bmpHeader.width + j / bytesPerPixel][0] = row[j + 2];
+				readableData[i * bmpHeader.width + j / bytesPerPixel][1] = row[j + 1];
+				readableData[i * bmpHeader.width + j / bytesPerPixel][2] = row[j];
 			}
 		}
 	}

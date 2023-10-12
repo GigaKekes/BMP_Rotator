@@ -106,18 +106,18 @@ void space()
 
 void printEssential(BMPImage bmim)
 {
-	std::cout << "Width: " << bmim.bmpFile->dibHeader.width << std::endl;
-	std::cout << "Height: " << bmim.bmpFile->dibHeader.height << std::endl;
-	std::cout << "Data size: " << bmim.bmpFile->dibHeader.dataSize << std::endl;
-	std::cout << "bits per pixel: " << bmim.bmpFile->dibHeader.bitsPerPixel << std::endl;
+	std::cout << "Width: " << bmim.bmpHeader.width << std::endl;
+	std::cout << "Height: " << bmim.bmpHeader.height << std::endl;
+	std::cout << "Data size: " << bmim.bmpHeader.dataSize << std::endl;
+	std::cout << "bits per pixel: " << bmim.bmpHeader.bitsPerPixel << std::endl;
 
 }
 
 void printRGB(BMPImage bmim)
 {
-	for (int i = 0; i < bmim.bmpFile->dibHeader.width * bmim.bmpFile->dibHeader.height; i++)
+	for (int i = 0; i < bmim.bmpHeader.width * bmim.bmpHeader.height; i++)
 	{
-		std::cout << '(' << i % bmim.bmpFile->dibHeader.width << ';' << i / bmim.bmpFile->dibHeader.width << ") "
+		std::cout << '(' << i % bmim.bmpHeader.width << ';' << i / bmim.bmpHeader.width << ") "
 			<< (int)bmim.readableData[i][0] << ' ' << (int)bmim.readableData[i][1] << " "
 			<< (int)bmim.readableData[i][2] << std::endl;
 	}
@@ -126,17 +126,17 @@ void printRGB(BMPImage bmim)
 void printHeader(BMPImage bmim)
 {
 
-	std::cout << "Offset: " << bmim.bmpFile->bmpHeader.pixelOffset << std::endl;
-	std::cout << "Width: " << bmim.bmpFile->dibHeader.width << std::endl;
-	std::cout << "Height: " << bmim.bmpFile->dibHeader.height << std::endl;
-	std::cout << "planes: " << bmim.bmpFile->dibHeader.planes << std::endl;
-	std::cout << "bitsPerPixel: " << bmim.bmpFile->dibHeader.bitsPerPixel << std::endl;
-	std::cout << "compression: " << bmim.bmpFile->dibHeader.compression << std::endl;
-	std::cout << "dataSize: " << bmim.bmpFile->dibHeader.dataSize << std::endl;
-	std::cout << "pWidth: " << bmim.bmpFile->dibHeader.pWidth << std::endl;
-	std::cout << "pHeight: " << bmim.bmpFile->dibHeader.pHeight << std::endl;
-	std::cout << "colorsUsed: " << bmim.bmpFile->dibHeader.colorsUsed << std::endl;
-	std::cout << "colors in color table: " << bmim.bmpFile->dibHeader.colorsUsed << std::endl;
-	std::cout << "importantColors: " << bmim.bmpFile->dibHeader.importantColors << std::endl;
+	std::cout << "Offset: " << bmim.bmpHeader.pixelOffset << std::endl;
+	std::cout << "Width: " << bmim.bmpHeader.width << std::endl;
+	std::cout << "Height: " << bmim.bmpHeader.height << std::endl;
+	std::cout << "planes: " << bmim.bmpHeader.planes << std::endl;
+	std::cout << "bitsPerPixel: " << bmim.bmpHeader.bitsPerPixel << std::endl;
+	std::cout << "compression: " << bmim.bmpHeader.compression << std::endl;
+	std::cout << "dataSize: " << bmim.bmpHeader.dataSize << std::endl;
+	std::cout << "pWidth: " << bmim.bmpHeader.pWidth << std::endl;
+	std::cout << "pHeight: " << bmim.bmpHeader.pHeight << std::endl;
+	std::cout << "colorsUsed: " << bmim.bmpHeader.colorsUsed << std::endl;
+	std::cout << "colors in color table: " << bmim.bmpHeader.colorsUsed << std::endl;
+	std::cout << "importantColors: " << bmim.bmpHeader.importantColors << std::endl;
 
 }
